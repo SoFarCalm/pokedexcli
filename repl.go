@@ -20,6 +20,14 @@ func startREPL() {
 		}
 
 		commandName := words[0]
+		if command, exists := getCommands()[commandName]; exists {
+			err := command.callback()
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			fmt.Printf("Unknown command: %v\n", commandName)
+		}
 	}
 }
 
@@ -29,7 +37,23 @@ func cleanInput(text string) []string {
 	return words
 }
 
-func commandExit() error {
-	fmt.Printf("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
+type cliCommand struct {
+	name        string
+	description string
+	callback    func() error
+}
+
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+	}
 }
